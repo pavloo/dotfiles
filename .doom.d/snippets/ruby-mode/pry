@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pry
+# key: trigger-key
+# condition: t
+# --
+require 'pry'; binding.pry

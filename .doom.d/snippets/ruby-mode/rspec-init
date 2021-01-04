@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: rspec init
+# uuid:
+# key: trigger-key
+# condition: t
+# --
+
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe $1, type: :request do
+ let(:obj) {  }
+
+ context 'success' do
+   before do
+   end
+
+   it 'always passes' do
+     expect(true).to be_truthy
+   end
+ end
+end
