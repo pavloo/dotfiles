@@ -29,8 +29,8 @@
 
 (setq
  lsp-ui-sideline-enable nil
- lsp-flycheck-live-reporting nil
- lsp-eldoc-hook nil
+ ;; lsp-flycheck-live-reporting nil
+ ;; lsp-eldoc-hook nil
  lsp-prefer-capf t
  )
 
@@ -53,6 +53,10 @@
   (setq
     js2-basic-offset 2
     js-indent-level 2))
+
+(add-hook 'typescript-tsx-mode-hook 'prettier-js-mode)
+(add-hook 'typescript-mode-hook 'prettier-js-mode)
+(add-hook 'typescript-mode-hook (lambda() (setq typescript-indent-level 2 indent-tabs-mode nil)))
 
 (add-hook! enh-ruby-mode
   (rvm-activate-corresponding-ruby))

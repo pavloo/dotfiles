@@ -20,3 +20,4 @@
 (package! yaml-mode)
 (package! restclient)
 (package! evil-snipe :disable t)
+(package! prettier-js)
