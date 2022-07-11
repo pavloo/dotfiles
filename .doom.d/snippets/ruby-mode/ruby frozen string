@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: ruby frozen string
+# key: frozen
+# --
+
+# frozen_string_literal: true
