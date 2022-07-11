@@ -98,3 +98,10 @@ source $ZSH/oh-my-zsh.sh
 source $ZSH_CUSTOM/aliases.zsh
 # ==========================================
 eval "$(direnv hook zsh)"
+
+# bun completions
+[ -s "/Users/pavloosadchyi/.bun/_bun" ] && source "/Users/pavloosadchyi/.bun/_bun"
+
+# Bun
+export BUN_INSTALL="/Users/pavloosadchyi/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

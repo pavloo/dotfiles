@@ -175,6 +175,14 @@
        ;; +wordnut         ; wordnet (wn) search
        ;; +langtool)       ; a proofreader (grammar/style check) for Emacs
 
+       :checkers
+       syntax
+       spell
+       grammar
+
+       :os
+       macos             ; MacOS-specific commands
+
        :config
        ;; For literate config users. This will tangle+compile a config.org
        ;; literate config in your `doom-private-dir' whenever it changes.
@@ -183,11 +191,6 @@
        ;; The default module sets reasonable defaults for Emacs. It also
        ;; provides a Spacemacs-inspired keybinding scheme and a smartparens
        ;; config. Use it as a reference for your own modules.
-       :checkers
-       flycheck          ; tasing you for every semicolon you forget
-       flyspell          ; tasing you for misspelling mispelling
-       :os
-       macos             ; MacOS-specific commands
        (default +bindings +smartparens))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
