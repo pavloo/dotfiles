@@ -1,199 +1,87 @@
-;;; .doom.d/config.el -*- lexical-binding: t; -*-
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets. It is opTIONAL.
+;; (setq user-full-name "John Doe"
+;;       user-mail-address "john@doe.com")
+
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(pixel-scroll-precision-mode)
 
-(load-theme 'zenburn t)
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
+;;
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;; - `doom-symbol-font' -- for symbols
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
+;;
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept. For example:
+;;
+(setq doom-font (font-spec :family "Menlo" :size 14 :weight 'semi-light))
+;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;;
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
 
-;; Web
-(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.css?\\'" . web-mode))
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'zenburn)
+                                        ;(load-theme 'zenburn)
 
-(after! web-mode
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  )
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
 
-(map! :ne "f" #'avy-goto-char)
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/org/")
 
-;; LSP
-(map!
- :ne "SPC m r" #'lsp-find-definition)
-(map!
- :ne "SPC m R" #'lsp-rename)
-(map!
- :ne "SPC m m" #'lsp-ui-imenu)
 
-(map!
- :ne "SPC m f" #'lsp-find-references)
+;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
+;;
+;;   (after! PACKAGE
+;;     (setq x y))
+;;
+;; The exceptions to this rule:
+;;
+;;   - Setting file/directory variables (like `org-directory')
+;;   - Setting variables which explicitly tell you to set them before their
+;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
+;;   - Setting doom variables (which start with 'doom-' or '+').
+;;
+;; Here are some additional functions/macros that will help you configure Doom.
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
 
-(setq
- lsp-ui-sideline-enable nil
- ;; lsp-flycheck-live-reporting nil
- ;; lsp-eldoc-hook nil
- lsp-prefer-capf t
- )
+(map! :ne "SPC y" #'yank-from-kill-ring)
 
-(defun copy-name-of-ember-test ()
-  (interactive)
-  (let ((result-fmt "localhost:4200/tests?filter=\"%s\"") (match "") (source (thing-at-point 'line)))
-    (string-match "test('\\(.+\\)'.+" source)
-    (setq match (match-string 1 source))
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
+;; etc).
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
 
-    (with-temp-buffer
-      (insert (format result-fmt match))
-      (clipboard-kill-region (point-min) (point-max)))
-    )
-  )
-
-(add-to-list 'auto-mode-alist '("\\.js?\\'" . rjsx-mode))
-(add-hook! js2-mode
-  :append
-  ;; (flycheck-select-checker 'javascript-eslint)
-  (setq
-    js2-basic-offset 2
-    js-indent-level 2))
-
-(add-hook 'typescript-tsx-mode-hook 'prettier-js-mode)
-(add-hook 'typescript-mode-hook 'prettier-js-mode)
-(add-hook 'typescript-mode-hook (lambda() (setq typescript-indent-level 2 indent-tabs-mode nil)))
-(add-hook 'typescript-tsx-mode-hook (lambda() (setq typescript-indent-level 2 indent-tabs-mode nil)))
-
-(add-hook! enh-ruby-mode
-  (rvm-activate-corresponding-ruby))
-
-(defun copy-current-line-position-to-clipboard (p)
-    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'"
-    (interactive "sAbsolute path y/n?: ")
-    (let ((path-with-line-number) (file-name (buffer-file-name)))
-      (when (and (not (string= p "y")) (projectile-project-root))
-        (setq file-name (file-relative-name buffer-file-name (projectile-project-root)))
-        )
-      (setq path-with-line-number (concat file-name ":" (number-to-string (line-number-at-pos))))
-      (x-select-text path-with-line-number)
-      (message (concat path-with-line-number " copied to clipboard"))))
-
-;; org
-(after! org
-  (map! :map org-mode-map
-        :n "M-j" #'org-metadown
-        :n "M-k" #'org-metaup))
-
-;; (setq +popup-default-display-buffer-actions '(+popup-display-buffer-stacked-side-window))
-
-;; (setq debug-on-error t)
-
-;; Projectile
-(map! :ne "SPC / p" #'counsel-projectile-ag)
-
-;; deal with strange evil-mode bug with delete https://emacs.stackexchange.com/questions/35946/strange-behaviour-on-evil-delete
-(defun stop-using-minibuffer ()
-    "kill the minibuffer"
-    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (abort-recursive-edit)))
-
-(add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
-
-(setq default-directory "~/")
-
-(map!
- :ne "SPC y" #'counsel-yank-pop)
-
-(map!
- :ne "SPC v" #'set-mark-command)
-
-(map!
- :ne "SPC g l m" #'git-link)
-
-(global-evil-matchit-mode 1)
-
-;; IRC
-(after! circe
-  (set-irc-server! "chat.freenode.net"
-    `(:tls t
-      :port 6697
-      :nick "Pavloo"
-      :sasl-username "Pavloo"
-      :sasl-password ,(+pass-get-secret "Chat/freenode")
-      :channels ("#emacs"))))
-
-;; Workspaces
-(after! workspaces
-  (setq +workspaces-on-switch-project-behavior nil)
-  )
-
-;; cursor
-;; (unless (display-graphic-p)
-;;   (require 'evil-terminal-cursor-changer)
-;;   (evil-terminal-cursor-changer-activate) ; or (etcc-on)
-;;   )
-(map!
-:n "M-k" #'move-text-up)
-(map!
- :n "M-j" #'move-text-down)
-
-(setq magit-auto-revert-mode nil)
-(setq global-auto-revert-mode nil)
-
-(use-package! atomic-chrome
-  :after-call focus-out-hook
+(after! eglot
   :config
-  (setq atomic-chrome-default-major-mode 'markdown-mode
-        atomic-chrome-buffer-open-style 'frame)
-  (atomic-chrome-start-server))
-
-;; Prevents some cases of Emacs flickering
-(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
-
-(unless (display-graphic-p)
-  (terminal-focus-reporting-mode))
-
-(- (+ (- (+ (/ 10 9) (* 8 7)) (* 6 5)) (/ 4 3)) (* 2 1))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#00212B" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#839496"])
- '(custom-safe-themes
-   (quote
-    ("0f0a885f4ce5b6f97e33c7483bfe4515220e9cbd9ab3ca798e0972f665f8ee4d" "5d09b4ad5649fea40249dd937eaaa8f8a229db1cec9a1a0ef0de3ccf63523014" default)))
- '(fci-rule-color "#405A61")
- '(jdee-db-active-breakpoint-face-colors (cons "#073642" "#268bd2"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#073642" "#859900"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#073642" "#56697A"))
- '(objed-cursor-color "#dc322f")
- '(pdf-view-midnight-colors (cons "#839496" "#002b36"))
- '(rustic-ansi-faces
-   ["#002b36" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#839496"])
- '(safe-local-variable-values (quote ((web-mode-auto-quote-style . 2))))
- '(vc-annotate-background "#002b36")
- '(vc-annotate-color-map
-   (list
-    (cons 20 "#859900")
-    (cons 40 "#959300")
-    (cons 60 "#a58e00")
-    (cons 80 "#b58900")
-    (cons 100 "#bc7407")
-    (cons 120 "#c35f0e")
-    (cons 140 "#cb4b16")
-    (cons 160 "#cd4439")
-    (cons 180 "#d03d5d")
-    (cons 200 "#d33682")
-    (cons 220 "#d63466")
-    (cons 240 "#d9334a")
-    (cons 260 "#dc322f")
-    (cons 280 "#ba3f41")
-    (cons 300 "#994d54")
-    (cons 320 "#775b67")
-    (cons 340 "#405A61")
-    (cons 360 "#405A61")))
- '(vc-annotate-very-old-color nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+  (add-to-list 'eglot-server-programs
+               '(typescript-tsx-mode . ("typescript-language-server" "--stdio"))))
