@@ -89,7 +89,7 @@
 (require 'magit)
 
 (defun get-crux-url-for-current-file ()
-  "Prints Amazon code link to the position in the current file."
+  "Prints Amazon code link from the position in the current file."
   (interactive)
   (let*  ((remote-url (magit-get "remote" "origin" "url"))
           (commit (magit-rev-parse "HEAD"))
@@ -120,7 +120,6 @@
 
 (setq llama-cpp-host (getenv "LLAMA_CPP_HOST"))
 (setq llama-cpp-http-basic-creds (getenv "LLAMA_CPP_BASIC_AUTH"))
-(message llama-cpp-http-basic-creds)
 
 (use-package! gptel
   :config
