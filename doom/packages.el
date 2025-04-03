@@ -51,3 +51,6 @@
 (package! zenburn-theme)
 (package! prettier-js)
 (package! gptel)
+
+(package! eglot-booster
+  :recipe (:host github :repo "jdtsmith/eglot-booster"))

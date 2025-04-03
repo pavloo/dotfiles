@@ -134,8 +134,6 @@
    )
   )
 
-;; M-x package-vc-install https://github.com/jdtsmith/eglot-booster
-;; and you also need to have https://github.com/blahgeek/emacs-lsp-booster binary installed in the system
 (use-package! eglot-booster
   :after eglot
   :config (eglot-booster-mode))
