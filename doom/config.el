@@ -137,3 +137,5 @@
 (use-package! eglot-booster
   :after eglot
   :config (eglot-booster-mode))
+
+(setq tramp-histfile-override "")
