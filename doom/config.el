@@ -24,7 +24,7 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "Menlo" :size 14 :weight 'semi-light))
+(setq doom-font (font-spec :family "Cascadia Mono" :size 14 :weight 'normal))
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -118,8 +118,18 @@
 
 (map! :ne "SPC c l" #'get-crux-url-for-current-file)
 
-(setq llama-cpp-host (getenv "LLAMA_CPP_HOST"))
+(setq llama-cpp-url (getenv "LLAMA_CPP_URL"))
 (setq llama-cpp-http-basic-creds (getenv "LLAMA_CPP_BASIC_AUTH"))
+
+(let ((url-regexp "^\\(http[s]?\\)://\\(\\([^/]+\\)\\)"))
+  (setq llama-cpp-url-parts
+        (when (string-match url-regexp llama-cpp-url)
+          (let ((protocol (match-string 1 llama-cpp-url))
+                (host (match-string 2 llama-cpp-url)))
+            (list protocol host)))))
+
+(setq llama-cpp-protocol (car llama-cpp-url-parts))
+(setq llama-cpp-host (car (cdr llama-cpp-url-parts)))
 
 (use-package! gptel
   :config
@@ -127,7 +137,7 @@
    gptel-model   'test
    gptel-backend (gptel-make-openai "llama-cpp"
                    :stream t
-                   :protocol "https"
+                   :protocol llama-cpp-protocol
                    :host llama-cpp-host
                    :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
                    :models '(test))
