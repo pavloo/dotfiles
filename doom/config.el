@@ -24,7 +24,7 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "Cascadia Mono" :size 14 :weight 'normal))
+(setq doom-font (font-spec :family "Cascadia Code" :size 14 :weight 'normal))
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
@@ -149,3 +149,13 @@
   :config (eglot-booster-mode))
 
 (setq tramp-histfile-override "")
+
+;; gptel
+;;
+(map! :ne "SPC l l" #'gptel)
+(map! :nev "SPC l s" #'gptel-send)
+(map! :nev "SPC l a" #'gptel-abort)
+
+;; multiple cursor
+(map! :ne "SPC k n" #'mc/mark-next-symbol-like-this)
+(map! :ne "SPC k p" #'mc/mark-previous-like-this-symbol)
