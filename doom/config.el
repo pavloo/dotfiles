@@ -70,8 +70,6 @@
 ;;   `require' or `use-package'.
 ;; - `map!' for binding new keys
 
-(map! :ne "SPC y" #'yank-from-kill-ring)
-
 ;; To get information about any of these functions/macros, move the cursor over
 ;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
 ;; This will open documentation for it, including demos of how they are used.
@@ -80,6 +78,8 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+;;
+(load! "./keybindings.el")
 
 (after! eglot
   :config
@@ -116,7 +116,6 @@
           )
       (message "Error creating Amazon link."))))
 
-(map! :ne "SPC c l" #'get-crux-url-for-current-file)
 
 (setq llama-cpp-url (getenv "LLAMA_CPP_URL"))
 (setq llama-cpp-http-basic-creds (getenv "LLAMA_CPP_BASIC_AUTH"))
@@ -150,12 +149,21 @@
 
 (setq tramp-histfile-override "")
 
-;; gptel
-;;
-(map! :ne "SPC l l" #'gptel)
-(map! :nev "SPC l s" #'gptel-send)
-(map! :nev "SPC l a" #'gptel-abort)
+(if (not (eq system-type 'darwin))
+    ;; Teach Emacs how to open links in your default Windows browser
+    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
+          (cmd-args '("/c" "start")))
+      (when (file-exists-p cmd-exe)
+        (setq browse-url-generic-program  cmd-exe
+              browse-url-generic-args     cmd-args
+              browse-url-browser-function 'browse-url-generic
+              search-web-default-browser 'browse-url-generic))))
 
-;; multiple cursor
-(map! :ne "SPC k n" #'mc/mark-next-symbol-like-this)
-(map! :ne "SPC k p" #'mc/mark-previous-like-this-symbol)
+(if (> (length (getenv "WSL_DISTRO_NAME")) 0)
+    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
+          (cmd-args '("/c" "start")))
+      (when (file-exists-p cmd-exe)
+        (setq browse-url-generic-program  cmd-exe
+              browse-url-generic-args     cmd-args
+              browse-url-browser-function 'browse-url-generic
+              search-web-default-browser 'browse-url-generic))))
