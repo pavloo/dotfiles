@@ -24,9 +24,6 @@
 
 (map! :ne "SPC l e" #'gptel-quick-error-at-point)
 
-;; Bind to a key
-(define-key flycheck-mode-map (kbd "C-c f y") 'flycheck-yank-error-message-at-point)
-
 ;; multiple cursor
 (map! :ne "SPC k n" #'mc/mark-next-symbol-like-this)
 (map! :ne "SPC k p" #'mc/mark-previous-like-this-symbol)

@@ -57,3 +57,6 @@
 
 (package! gptel-quick
   :recipe (:host github :repo "karthink/gptel-quick"))
+
+
+(package! posframe)
