@@ -167,3 +167,7 @@
               browse-url-generic-args     cmd-args
               browse-url-browser-function 'browse-url-generic
               search-web-default-browser 'browse-url-generic))))
+
+(setq gptel-default-mode 'org-mode)
+
+(setq js-indent-level 2)
