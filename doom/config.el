@@ -132,16 +132,20 @@
 
 (use-package! gptel
   :config
-  (setq
-   gptel-model   'test
-   gptel-backend (gptel-make-openai "llama-cpp"
-                   :stream t
-                   :protocol llama-cpp-protocol
-                   :host llama-cpp-host
-                   :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
-                   :models '(test))
-   )
-  )
+  (progn
+    (setq
+     gptel-model   'test
+     gptel-backend (gptel-make-openai "llama-cpp"
+                     :stream t
+                     :protocol llama-cpp-protocol
+                     :host llama-cpp-host
+                     :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
+                     :models '(test))
+     )
+    (gptel-make-openai "diya"
+      :protocol "http"
+      :host "localhost:5962"
+      :models '(test))))
 
 (use-package! eglot-booster
   :after eglot
