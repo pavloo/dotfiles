@@ -130,22 +130,25 @@
 (setq llama-cpp-protocol (car llama-cpp-url-parts))
 (setq llama-cpp-host (car (cdr llama-cpp-url-parts)))
 
+(defun is-in-wsl ()
+  (when (> (length (getenv "WSL_DISTRO_NAME")) 0) 't))
+
 (use-package! gptel
   :config
-  (progn
-    (setq
-     gptel-model   'test
-     gptel-backend (gptel-make-openai "llama-cpp"
-                     :stream t
-                     :protocol llama-cpp-protocol
-                     :host llama-cpp-host
-                     :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
-                     :models '(test))
-     )
-    (gptel-make-openai "diya"
-      :protocol "http"
-      :host "localhost:5962"
-      :models '(test))))
+  (let
+      ((llama (gptel-make-openai "llama-cpp"
+                :stream t
+                :protocol llama-cpp-protocol
+                :host llama-cpp-host
+                :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
+                :models '(test)))
+       (diya (gptel-make-openai "diya"
+               :protocol "http"
+               :host "localhost:5962"
+               :models '(test))))
+    (if (is-in-wsl)
+        (setq gptel-backend llama)
+      (setq gptel-backend diya))))
 
 (use-package! eglot-booster
   :after eglot
@@ -153,17 +156,7 @@
 
 (setq tramp-histfile-override "")
 
-(if (not (eq system-type 'darwin))
-    ;; Teach Emacs how to open links in your default Windows browser
-    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
-          (cmd-args '("/c" "start")))
-      (when (file-exists-p cmd-exe)
-        (setq browse-url-generic-program  cmd-exe
-              browse-url-generic-args     cmd-args
-              browse-url-browser-function 'browse-url-generic
-              search-web-default-browser 'browse-url-generic))))
-
-(if (> (length (getenv "WSL_DISTRO_NAME")) 0)
+(if (is-in-wsl)
     (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
           (cmd-args '("/c" "start")))
       (when (file-exists-p cmd-exe)
