@@ -60,3 +60,5 @@
 
 
 (package! posframe)
+
+(package! leetcode)
