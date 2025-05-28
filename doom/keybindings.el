@@ -1,7 +1,6 @@
 ;;; keybinding.el -*- lexical-binding: t; -*-
 
 (map! :ne "SPC y" #'yank-from-kill-ring)
-(map! :ne "SPC c l" #'get-crux-url-for-current-file)
 
 ;; gptel
 (map! :ne "SPC l l" #'gptel)
@@ -27,3 +26,7 @@
 ;; multiple cursor
 (map! :ne "SPC k n" #'mc/mark-next-symbol-like-this)
 (map! :ne "SPC k p" #'mc/mark-previous-like-this-symbol)
+
+;; code
+(map! :ne "SPC c l" #'get-crux-url-for-current-file)
+(map! :ne "SPC c m" #'flycheck-eglot-mode)
