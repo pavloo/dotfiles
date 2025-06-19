@@ -65,3 +65,5 @@
 
 (package! emacsql :pin "491105a01f58bf0b346cbc0254766c6800b229a2")
 (package! magit :pin "e3806cbb7dd38ab73624ad48024998705f9d0d20")
+
+(unpin! org-roam)
