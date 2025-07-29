@@ -84,8 +84,10 @@
 (after! eglot
   :config
   (add-to-list 'eglot-server-programs
+               '(typescript-tsx-mode . ("typescript-language-server" "--stdio"))
+               ;; '(typescript-mode . ("node" (format "~/.nvm/versions/node/%s/lib/node_modules/eslint-server/lib/index.js" "--stdio") (string-trim (shell-command-to-string "node --version"))))
                '(typescript-mode . ("typescript-language-server" "--stdio"))
-               '(typescript-mode . ("node" (format "~/.nvm/versions/node/%s/lib/node_modules/eslint-server/lib/index.js" "--stdio") (string-trim (shell-command-to-string "node --version"))))))
+               ))
 
 ;; TODO finish this function to work universally
 ;; instead of SPC c m hack
