@@ -160,6 +160,7 @@
                :protocol "http"
                :host "localhost:5962"
                :models '(claude-3-5-sonnet))))
+    (setq gptel-model 'test)
     (if (is-in-wsl)
         (setq gptel-backend llama)
       (setq gptel-backend diya))))
