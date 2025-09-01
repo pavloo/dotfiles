@@ -186,3 +186,5 @@
 (setq typescript-indent-level 2)
 
 (setq leetcode-prefer-language "typescript")
+
+(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
