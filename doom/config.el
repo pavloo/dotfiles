@@ -46,7 +46,6 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
-
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -165,10 +164,6 @@
         (setq gptel-backend llama)
       (setq gptel-backend diya))))
 
-(use-package! eglot-booster
-  :after eglot
-  :config (eglot-booster-mode))
-
 (setq tramp-histfile-override "")
 
 (if (is-in-wsl)
@@ -187,4 +182,6 @@
 
 (setq leetcode-prefer-language "typescript")
 
-(add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
+(after! vterm
+  (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
+  )
