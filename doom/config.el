@@ -180,6 +180,7 @@
 
 (setq js-indent-level 2)
 (setq typescript-indent-level 2)
+(setq web-mode-code-indent-offset 2)
 
 (setq leetcode-prefer-language "typescript")
 
