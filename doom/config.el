@@ -187,3 +187,18 @@
 (after! vterm
   (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
   )
+
+(defun disable-autoformatting ()
+  "Disable autoformatting for the current buffer."
+  (interactive)
+  (apheleia-mode -1)
+  )
+
+(defun save-without-autoformatting ()
+  "Save file without invoking auto-formatter."
+  (interactive)
+  (apheleia-mode -1)
+  (save-buffer)
+  (apheleia-mode)
+  (message "Saved current buffer without formatting.")
+  )

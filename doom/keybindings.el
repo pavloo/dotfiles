@@ -30,3 +30,5 @@
 ;; code
 (map! :ne "SPC c l" #'get-crux-url-for-current-file)
 (map! :ne "SPC c m" #'flycheck-eglot-mode)
+
+(map! :ne "SPC f w" #'save-without-autoformatting)
