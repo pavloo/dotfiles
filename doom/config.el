@@ -80,24 +80,16 @@
 ;;
 (load! "./keybindings.el")
 
-(after! eglot
-  :config
-  (add-to-list 'eglot-server-programs
-               '(typescript-tsx-mode . ("typescript-language-server" "--stdio"))
-               ;; '(typescript-mode . ("node" (format "~/.nvm/versions/node/%s/lib/node_modules/eslint-server/lib/index.js" "--stdio") (string-trim (shell-command-to-string "node --version"))))
-               '(typescript-mode . ("typescript-language-server" "--stdio"))
-               ))
-
-;; TODO finish this function to work universally
-;; instead of SPC c m hack
-(defun switch-eglot ()
-  "If there are a few LSP servers added for the same language mode,
-  this function will switch between them"
-  (interactive)
-  (let ((current-mode-server-programs (alist-get major-mode eglot-server-programs)))
-    (when (> (length current-mode-server-programs) 1)
-      (message "YO")))
-  )
+;; https://www.rahuljuliato.com/posts/eglot-rassumfrassum
+(with-eval-after-load 'eglot
+  (add-to-list
+   'eglot-server-programs
+   '((tsx-ts-mode typescript-ts-mode)
+     . ("rass"
+	"--"
+	"typescript-language-server" "--stdio"
+	"--"
+	"eslint-lsp" "--stdio"))))
 
 (require 'magit)
 

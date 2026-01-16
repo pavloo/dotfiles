@@ -52,9 +52,6 @@
 (package! prettier-js)
 (package! gptel)
 
-(package! eglot-booster
-  :recipe (:host github :repo "jdtsmith/eglot-booster"))
-
 (package! gptel-quick
   :recipe (:host github :repo "karthink/gptel-quick"))
 
