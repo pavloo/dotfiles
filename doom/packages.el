@@ -51,10 +51,17 @@
 (package! zenburn-theme)
 (package! prettier-js)
 (package! gptel)
+(package! gptel-agent)
+(unpin! gptel)
+(unpin! gptel-agent)
 
 (package! gptel-quick
   :recipe (:host github :repo "karthink/gptel-quick"))
 
+(use-package gptel-agent
+  :vc ( :url "https://github.com/karthink/gptel-agent"
+             :rev :newest)
+  :config (gptel-agent-update))         ;Read files from agents directories
 
 (package! posframe)
 

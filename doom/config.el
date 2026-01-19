@@ -146,13 +146,13 @@
                 :protocol llama-cpp-protocol
                 :host llama-cpp-host
                 :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
-                :models '(test)))
+                :models '(qwen)))
        (diya (gptel-make-openai "diya"
                :stream t
                :protocol "http"
                :host "localhost:5962"
                :models '(claude-3-5-sonnet))))
-    (setq gptel-model 'test)
+    (setq gptel-model 'qwen)
     (if (is-in-wsl)
         (setq gptel-backend llama)
       (setq gptel-backend diya))))
@@ -160,13 +160,12 @@
 (setq tramp-histfile-override "")
 
 (if (is-in-wsl)
-    (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
-          (cmd-args '("/c" "start")))
-      (when (file-exists-p cmd-exe)
-        (setq browse-url-generic-program  cmd-exe
-              browse-url-generic-args     cmd-args
-              browse-url-browser-function 'browse-url-generic
-              search-web-default-browser 'browse-url-generic))))
+    (let ((cmd-exe "chromium")
+          (cmd-args '("--ozone-platform=wayland")))
+      (setq browse-url-generic-program  cmd-exe
+            browse-url-generic-args     cmd-args
+            browse-url-browser-function 'browse-url-generic
+            search-web-default-browser 'browse-url-generic)))
 
 (setq gptel-default-mode 'org-mode)
 
