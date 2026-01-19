@@ -193,3 +193,10 @@
   (apheleia-mode)
   (message "Saved current buffer without formatting.")
   )
+
+;; Display emojis everywhere
+(after! emojify
+  (setq emojify-display-style 'unicode))  ; or 'image for image-based emojis
+
+;; Enable globally (default is prog-mode and text-mode only)
+(global-emojify-mode)
