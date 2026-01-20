@@ -91,6 +91,8 @@
 	"--"
 	"eslint-lsp" "--stdio"))))
 
+(setq! eldoc-echo-area-use-multiline-p nil)
+
 (require 'magit)
 
 (defun get-crux-url-for-current-file ()
