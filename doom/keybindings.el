@@ -32,3 +32,18 @@
 (map! :ne "SPC c m" #'flycheck-eglot-mode)
 
 (map! :ne "SPC f w" #'save-without-autoformatting)
+
+;; org roam daily
+
+(map! :ne "SPC n r d /"
+      (defun search-org-daily-days (period)
+        "Search for a string in daily notes.
+         Specify period:
+         w (week/7 days, default), m (month/30 days), y (year/365 days)."
+        (interactive
+         (list (pcase (read-char-choice "Period: [w]eek, [m]onth, [y]ear (default w)? " '(?w ?m ?y ?\r ?\n))
+                 (?w 7)
+                 (?m 30)
+                 (?y 365)
+                 (_ 7))))
+        (search-dated-org-files period)))

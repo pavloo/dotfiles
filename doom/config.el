@@ -78,6 +78,41 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 ;;
+;;
+
+(defun search-dated-org-files (days &optional directory search-string)
+  "Search for SEARCH-STRING in .org files dated within DAYS in DIRECTORY."
+  (interactive
+   (list (read-number "Days: " 7)
+         nil
+         nil))
+  (let* ((directory (or directory (concat org-directory "roam/daily")))
+         (search-string (or search-string (read-string "Search string: ")))
+         (cutoff-date (time-subtract (current-time) (days-to-time days)))
+         (results '()))
+    (dolist (file (directory-files directory t "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\.org$"))
+      (let ((file-date (date-to-time (substring (file-name-nondirectory file) 0 10))))
+        (when (time-less-p cutoff-date file-date)
+          (with-temp-buffer
+            (insert-file-contents file)
+            (goto-char (point-min))
+            (while (search-forward search-string nil t)
+              (push (format "%s:%d:%s" 
+                            file
+                            (line-number-at-pos)
+                            (string-trim (thing-at-point 'line t)))
+                    results))))))
+    (if results
+        (let ((buf (get-buffer-create "*search-dated-files*")))
+          (with-current-buffer buf
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (insert (mapconcat 'identity (nreverse results) "\n"))
+              (grep-mode))
+            (goto-char (point-min)))
+          (display-buffer buf))
+      (message "No matches found"))))
+
 (load! "./keybindings.el")
 
 ;; https://www.rahuljuliato.com/posts/eglot-rassumfrassum
