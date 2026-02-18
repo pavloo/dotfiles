@@ -87,6 +87,7 @@
 ;; they are implemented.
 ;;
 ;;
+;;
 
 (defun search-dated-org-files (days &optional directory search-string)
   "Search for SEARCH-STRING in .org files dated within DAYS in DIRECTORY."
@@ -98,6 +99,7 @@
          (search-string (or search-string (read-string "Search string: ")))
          (cutoff-date (time-subtract (current-time) (days-to-time days)))
          (results '()))
+    (if (string-empty-p search-string) (error "Search string is empty."))
     (dolist (file (directory-files directory t "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\.org$"))
       (let ((file-date (date-to-time (substring (file-name-nondirectory file) 0 10))))
         (when (time-less-p cutoff-date file-date)
