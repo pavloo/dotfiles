@@ -71,3 +71,5 @@
 (package! magit :pin "e3806cbb7dd38ab73624ad48024998705f9d0d20")
 
 (unpin! org-roam)
+
+(package! envrc)

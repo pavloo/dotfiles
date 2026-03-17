@@ -24,8 +24,16 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "Cascadia Code" :size 14 :weight 'normal))
+;;
+
+(defun is-in-wsl ()
+  (when (> (length (getenv "WSL_DISTRO_NAME")) 0) 't))
+
+(setq doom-font (font-spec :family "CaskaydiaCove Nerd Font" :size 14 :weight 'normal))
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+(if (is-in-wsl)
+    (set-fontset-font t 'symbol (font-spec :family "Noto Color Emoji") nil 'prepend))
+
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -172,9 +180,6 @@
 (setq llama-cpp-protocol (car llama-cpp-url-parts))
 (setq llama-cpp-host (car (cdr llama-cpp-url-parts)))
 
-(defun is-in-wsl ()
-  (when (> (length (getenv "WSL_DISTRO_NAME")) 0) 't))
-
 (use-package! gptel
   :config
   (let
@@ -212,6 +217,7 @@
 
 (setq leetcode-prefer-language "typescript")
 
+(setq vterm-shell "/bin/zsh")
 (after! vterm
   (add-to-list 'vterm-eval-cmds '("update-pwd" (lambda (path) (setq default-directory path))))
   )
@@ -237,3 +243,6 @@
 
 ;; Enable globally (default is prog-mode and text-mode only)
 (global-emojify-mode)
+
+(use-package envrc
+  :hook (after-init . envrc-global-mode))
