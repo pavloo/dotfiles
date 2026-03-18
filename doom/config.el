@@ -244,5 +244,11 @@
 ;; Enable globally (default is prog-mode and text-mode only)
 (global-emojify-mode)
 
-(use-package envrc
-  :hook (after-init . envrc-global-mode))
+(add-hook 'python-mode-hook
+          (lambda ()
+            (require 'eglot)
+            (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+            (eglot-ensure)))
+
+(setq agent-shell-anthropic-authentication
+      (agent-shell-anthropic-make-authentication :login t))

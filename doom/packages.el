@@ -73,3 +73,7 @@
 (unpin! org-roam)
 
 (package! envrc)
+
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)
