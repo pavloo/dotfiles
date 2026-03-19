@@ -132,7 +132,15 @@
 	"--"
 	"typescript-language-server" "--stdio"
 	"--"
-	"eslint-lsp" "--stdio"))))
+	"eslint-lsp" "--stdio")))
+  (add-to-list
+   'eglot-server-programs
+   '((python-ts-mode python-mode)
+     . ("rass"
+	"--"
+	"ty" "server"
+	"--"
+	"pylsp"))))
 
 (setq! eldoc-echo-area-use-multiline-p nil)
 
@@ -243,12 +251,3 @@
 
 ;; Enable globally (default is prog-mode and text-mode only)
 (global-emojify-mode)
-
-(add-hook 'python-mode-hook
-          (lambda ()
-            (require 'eglot)
-            (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
-            (eglot-ensure)))
-
-(setq agent-shell-anthropic-authentication
-      (agent-shell-anthropic-make-authentication :login t))
