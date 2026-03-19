@@ -260,5 +260,6 @@
             (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
             (eglot-ensure)))
 
-(setq agent-shell-anthropic-authentication
-      (agent-shell-anthropic-make-authentication :login t))
+(use-package! agent-shell-kiro
+  :custom
+  (agent-shell-kiro-acp-command '("kiro-cli" "acp" "--agent" "aws-cx-builder-agent")))
