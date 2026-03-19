@@ -221,6 +221,8 @@
 
 (setq gptel-default-mode 'org-mode)
 
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+
 (setq js-indent-level 2)
 (setq typescript-indent-level 2)
 (setq web-mode-code-indent-offset 2)
@@ -249,7 +251,14 @@
 
 ;; Display emojis everywhere
 (after! emojify
-  (setq emojify-display-style 'unicode))  ; or 'image for image-based emojis
+  (setq emojify-display-style 'unicode) ; Enable globally (default is prog-mode and text-mode only)
+  (global-emojify-mode))  ; or 'image for image-based emojis
 
-;; Enable globally (default is prog-mode and text-mode only)
-(global-emojify-mode)
+(add-hook 'python-mode-hook
+          (lambda ()
+            (require 'eglot)
+            (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+            (eglot-ensure)))
+
+(setq agent-shell-anthropic-authentication
+      (agent-shell-anthropic-make-authentication :login t))
