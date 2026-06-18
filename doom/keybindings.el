@@ -2,16 +2,12 @@
 
 (map! :ne "SPC y" #'yank-from-kill-ring)
 
-;; gptel
-(map! :ne "SPC l l" #'gptel)
-(map! :ne "SPC l m" #'gptel-menu)
-(map! :nev "SPC l s" #'gptel-send)
-(map! :nev "SPC l a" #'gptel-add)
-(map! :nev "SPC l q" #'gptel-quick)
-(map! :nev "SPC l k" #'gptel-abort)
-(map! :nev "SPC l c" #'gptel-context-remove-all)
-(map! :nev "SPC l r" #'gptel-rewrite)
-(map! :nev "SPC m c s" #'org-babel-mark-block)
+;; agent shell
+(map! :ne "SPC l s" #'agent-shell)
+(map! :ne "SPC l c" #'agent-shell-prompt-compose)
+(map! :ne "SPC l d" #'agent-shell-send-dwim)
+(map! :ne "SPC l i" #'agent-shell-send-clipboard-image)
+(map! :ne "SPC l m" #'agent-shell-manager-toggle)
 
 (defun gptel-quick-error-at-point ()
   "Calls gptel-quick sending flycheck error under cursor."

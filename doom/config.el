@@ -190,25 +190,6 @@
 (setq llama-cpp-protocol (car llama-cpp-url-parts))
 (setq llama-cpp-host (car (cdr llama-cpp-url-parts)))
 
-(use-package! gptel
-  :config
-  (let
-      ((llama (gptel-make-openai "llama-cpp"
-                :stream t
-                :protocol llama-cpp-protocol
-                :host llama-cpp-host
-                :header `(("Authorization" . ,(format "Basic %s" llama-cpp-http-basic-creds)))
-                :models '(qwen)))
-       (diya (gptel-make-openai "diya"
-               :stream t
-               :protocol "http"
-               :host "localhost:5962"
-               :models '(claude-3-5-sonnet))))
-    (setq gptel-model 'qwen)
-    (if (is-in-wsl)
-        (setq gptel-backend llama)
-      (setq gptel-backend diya))))
-
 (setq tramp-histfile-override "")
 
 (if (is-in-wsl)
@@ -218,8 +199,6 @@
             browse-url-generic-args     cmd-args
             browse-url-browser-function 'browse-url-generic
             search-web-default-browser 'browse-url-generic)))
-
-(setq gptel-default-mode 'org-mode)
 
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
@@ -263,3 +242,35 @@
 (use-package! agent-shell-kiro
   :custom
   (agent-shell-kiro-acp-command '("kiro-cli" "acp" "--agent" "aws-cx-builder-agent")))
+
+(use-package! agent-shell-manager
+  :config
+  (set-evil-initial-state! 'agent-shell-manager-mode 'emacs))
+
+(setq agent-shell-mcp-servers
+      '(((name . "builder-mcp")
+         (command . "builder-mcp")
+         (args . ())
+         (env . ()))
+        ((name . "aws-cx-builder-mcp")
+         (command . "aws-cx-builder-mcp")
+         (args . ())
+         (env . ()))
+        ((name . "sage-plus-service-mcp")
+         (command . "sage-plus-service-mcp")
+         (args . ())
+         (env . ()))
+        ((name . "amazon-sharepoint-mcp")
+         (command . "amazon-sharepoint-mcp")
+         (args . ())
+         (env . ()))
+        ((name . "venue-mcp")
+         (command . "venue-mcp")
+         (args . ())
+         (env . ()))
+        ((name . "threatcomposer-ai-mcp")
+         (command . "uvx")
+         (args . ("--from"
+                  "git+https://github.com/awslabs/threat-composer.git#subdirectory=packages/threat-composer-ai"
+                  "threat-composer-ai-mcp"))
+         (env . ()))))

@@ -50,18 +50,6 @@
 
 (package! zenburn-theme)
 (package! prettier-js)
-(package! gptel)
-(package! gptel-agent)
-(unpin! gptel)
-(unpin! gptel-agent)
-
-(package! gptel-quick
-  :recipe (:host github :repo "karthink/gptel-quick"))
-
-(use-package gptel-agent
-  :vc ( :url "https://github.com/karthink/gptel-agent"
-             :rev :newest)
-  :config (gptel-agent-update))         ;Read files from agents directories
 
 (package! posframe)
 
@@ -72,8 +60,10 @@
 
 (unpin! org-roam)
 
-(package! envrc)
-
 (package! shell-maker)
 (package! acp)
 (package! agent-shell)
+(unpin! agent-shell)
+(package! agent-shell-manager :recipe (:host github :repo "jethrokuan/agent-shell-manager"))
+
+
