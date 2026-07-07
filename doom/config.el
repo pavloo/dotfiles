@@ -273,4 +273,10 @@
          (args . ("--from"
                   "git+https://github.com/awslabs/threat-composer.git#subdirectory=packages/threat-composer-ai"
                   "threat-composer-ai-mcp"))
+         (env . ()))
+        ((name . "playwright")
+         (command . "npx")
+         (args . ("@playwright/mcp@latest"))
          (env . ()))))
+
+(setq agent-shell-permission-responder-function nil)
