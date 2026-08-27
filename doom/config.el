@@ -277,6 +277,10 @@
         ((name . "playwright")
          (command . "npx")
          (args . ("@playwright/mcp@latest"))
+         (env . ()))
+        ((name . "local-chorus-mcp")
+         (command . "local-chorus-mcp")
+         (args . ())
          (env . ()))))
 
 (setq agent-shell-permission-responder-function nil)
