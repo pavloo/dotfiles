@@ -29,7 +29,14 @@
 (defun is-in-wsl ()
   (when (> (length (getenv "WSL_DISTRO_NAME")) 0) 't))
 
-(setq doom-font (font-spec :family "CaskaydiaCove Nerd Font" :size 14 :weight 'normal))
+;; `:size' as an integer means pixels. On macOS those are logical points that a
+;; Retina display doubles into real pixels; on Windows Emacs is DPI-aware and
+;; uses real pixels directly, so it needs twice the number for the same look.
+(defvar my-font-size
+  (if (eq system-type 'windows-nt) 28 14)
+  "Pixel size for `doom-font', adjusted for how each platform reports pixels.")
+
+(setq doom-font (font-spec :family "CaskaydiaCove NF" :size my-font-size :weight 'normal))
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 (if (is-in-wsl)
     (set-fontset-font t 'symbol (font-spec :family "Noto Color Emoji") nil 'prepend))
@@ -175,20 +182,6 @@
           (message crux-url)
           )
       (message "Error creating Amazon link."))))
-
-
-(setq llama-cpp-url (getenv "LLAMA_CPP_URL"))
-(setq llama-cpp-http-basic-creds (getenv "LLAMA_CPP_BASIC_AUTH"))
-
-(let ((url-regexp "^\\(http[s]?\\)://\\(\\([^/]+\\)\\)"))
-  (setq llama-cpp-url-parts
-        (when (string-match url-regexp llama-cpp-url)
-          (let ((protocol (match-string 1 llama-cpp-url))
-                (host (match-string 2 llama-cpp-url)))
-            (list protocol host)))))
-
-(setq llama-cpp-protocol (car llama-cpp-url-parts))
-(setq llama-cpp-host (car (cdr llama-cpp-url-parts)))
 
 (setq tramp-histfile-override "")
 
