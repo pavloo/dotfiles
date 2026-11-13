@@ -8,7 +8,8 @@
    '("e8bd9bbf6506afca133125b0be48b1f033b1c8647c628652ab7a2fe065c10ef0"
      "f87c86fa3d38be32dc557ba3d4cedaaea7bc3d97ce816c0e518dfe9633250e34" default))
  '(package-selected-packages
-   '(agent-shell-macext eglot-booster org-roam shell-maker zenburn-theme))
+   '(agent-shell-macext eglot-booster org-download org-present org-roam shell-maker
+     visual-fill-column zenburn-theme))
  '(package-vc-selected-packages
    '((agent-shell-macext :url "https://github.com/cxa/agent-shell-macext")
      (shell-maker :url "https://github.com/xenodium/shell-maker" :branch "main")

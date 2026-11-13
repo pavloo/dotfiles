@@ -66,4 +66,8 @@
 (unpin! agent-shell)
 (package! agent-shell-manager :recipe (:host github :repo "jethrokuan/agent-shell-manager"))
 
+(package! mermaid-mode)
+(package! ob-mermaid)
 
+(package! org-present)
+(package! visual-fill-column)

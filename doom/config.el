@@ -140,8 +140,9 @@
      . ("rass"
 	"--"
 	"typescript-language-server" "--stdio"
-	"--"
-	"eslint-lsp" "--stdio")))
+	;; "--"
+	;; "eslint-lsp" "--stdio"
+        )))
   (add-to-list
    'eglot-server-programs
    '((python-ts-mode python-mode)
@@ -234,7 +235,7 @@
 
 (use-package! agent-shell-kiro
   :custom
-  (agent-shell-kiro-acp-command '("kiro-cli" "acp" "--agent" "aws-cx-builder-agent")))
+  (agent-shell-kiro-acp-command '("kiro-cli" "acp" "--agent" "permissive")))
 
 (use-package! agent-shell-manager
   :config
@@ -274,6 +275,112 @@
         ((name . "local-chorus-mcp")
          (command . "local-chorus-mcp")
          (args . ())
+         (env . ()))
+        ((name . "slack-mcp")
+         (command . "slack-mcp")
+         (args . ())
          (env . ()))))
 
 (setq agent-shell-permission-responder-function nil)
+
+;; Make claude-agent-acp use the Toolbox claude instead of its bundled SDK CLI
+(setenv "CLAUDE_CODE_EXECUTABLE" (expand-file-name "~/.toolbox/bin/claude"))
+
+(setq markdown-command "pandoc")
+
+;; org-present: center text with visual-fill-column
+(defun my/org-present-start ()
+  (setq-local visual-fill-column-width 200
+              visual-fill-column-center-text t)
+  (visual-fill-column-mode 1)
+  (display-line-numbers-mode 0))
+
+(defun my/org-present-end ()
+  (visual-fill-column-mode 0)
+  (display-line-numbers-mode 1)
+  (kill-local-variable 'visual-fill-column-width)
+  (kill-local-variable 'visual-fill-column-center-text))
+
+(after! org-present
+  (add-hook 'org-present-mode-hook #'my/org-present-start)
+  (add-hook 'org-present-mode-quit-hook #'my/org-present-end))
+
+(use-package! org-download
+  :after org
+  :hook (dired-mode . org-download-enable)
+  :config
+  (setq org-download-screenshot-method "pngpaste %s"))
+
+;; Resize inline images with the mouse wheel instead of scrolling when the
+;; pointer is over an image. Org inline images use `image-map', and overlay
+;; keymaps take precedence over `pixel-scroll-precision-mode-map'.
+(after! image
+  (map! :map image-map
+        [wheel-up]          #'image-mouse-increase-size
+        [wheel-down]        #'image-mouse-decrease-size
+        [double-wheel-up]   #'image-mouse-increase-size
+        [double-wheel-down] #'image-mouse-decrease-size
+        [triple-wheel-up]   #'image-mouse-increase-size
+        [triple-wheel-down] #'image-mouse-decrease-size))
+
+;; Persist mouse-wheel image resizes in org as `#+attr_org: :width N'.
+;; Requires `org-image-actual-width' to be nil (the default) so org honors it.
+(defvar my/org-image--pending nil "Pending (MARKER . WIDTH) to write.")
+(defvar my/org-image--timer nil)
+
+(defun my/org-image--write-width (marker width)
+  (when (buffer-live-p (marker-buffer marker))
+    (with-current-buffer (marker-buffer marker)
+      (save-excursion
+        (goto-char marker)
+        (let* ((para (org-element-lineage (org-element-context) '(paragraph) t))
+               (beg (and para (org-element-property :begin para)))
+               (post (and para (org-element-property :post-affiliated para)))
+               (case-fold-search t))
+          (cond
+           ((not para) (message "Image is not in a paragraph; width not saved"))
+           ((progn (goto-char beg) (re-search-forward "^[ \t]*#\\+attr_org:.*$" post t))
+            (let ((eol (match-end 0)))
+              (goto-char (match-beginning 0))
+              (if (re-search-forward ":width[ \t]+[^ \t\n]+" eol t)
+                  (replace-match (format ":width %d" width) t t)
+                (goto-char eol)
+                (insert (format " :width %d" width)))))
+           ((progn (goto-char post) (skip-chars-backward " \t") (bolp))
+            (let ((indent (current-indentation)))
+              (beginning-of-line)
+              (insert (make-string indent ?\s)
+                      (format "#+attr_org: :width %d\n" width))))
+           (t (message "Can't place #+attr_org here; width not saved"))))))
+    (set-marker marker nil)))
+
+(defun my/org-image--flush ()
+  (when my/org-image--timer (cancel-timer my/org-image--timer))
+  (setq my/org-image--timer nil)
+  (when my/org-image--pending
+    (let ((p my/org-image--pending))
+      (setq my/org-image--pending nil)
+      (my/org-image--write-width (car p) (cdr p)))))
+
+(defun my/org-image-persist-width (event &rest _)
+  (let* ((posn (event-start event))
+         (win (posn-window posn))
+         (pos (posn-point posn)))
+    (when (and (windowp win) pos)
+      (with-current-buffer (window-buffer win)
+        (let ((img (get-char-property pos 'display)))
+          (when (and (derived-mode-p 'org-mode) (eq (car-safe img) 'image))
+            (let ((start (or (previous-single-char-property-change (1+ pos) 'display) pos))
+                  (width (round (car (image-size img t)))))
+              (when (and my/org-image--pending
+                         (not (equal (marker-position (car my/org-image--pending)) start)))
+                (my/org-image--flush))
+              (when my/org-image--pending
+                (set-marker (car my/org-image--pending) nil))
+              (setq my/org-image--pending (cons (copy-marker start) width))
+              (when my/org-image--timer (cancel-timer my/org-image--timer))
+              (setq my/org-image--timer
+                    (run-with-idle-timer 0.5 nil #'my/org-image--flush)))))))))
+
+(advice-add 'image-mouse-increase-size :after #'my/org-image-persist-width)
+(advice-add 'image-mouse-decrease-size :after #'my/org-image-persist-width)
