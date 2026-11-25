@@ -71,3 +71,6 @@
 
 (package! org-present)
 (package! visual-fill-column)
+(package! mcp)
+(package! alert)
+(package! gptel-agent)

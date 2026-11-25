@@ -5,9 +5,10 @@
 ;; agent shell
 (map! :ne "SPC l s" #'agent-shell)
 (map! :ne "SPC l c" #'agent-shell-prompt-compose)
-(map! :ne "SPC l d" #'agent-shell-send-dwim)
+(map! :nve "SPC l d" #'agent-shell-send-dwim)
 (map! :ne "SPC l i" #'agent-shell-send-clipboard-image)
 (map! :ne "SPC l m" #'agent-shell-manager-toggle)
+(map! :nve "SPC l t" #'agent-shell-send-region-to)
 
 (defun gptel-quick-error-at-point ()
   "Calls gptel-quick sending flycheck error under cursor."

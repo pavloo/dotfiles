@@ -283,6 +283,8 @@
 
 (setq agent-shell-permission-responder-function nil)
 
+(load! "agent-shell-workers")
+
 ;; Make claude-agent-acp use the Toolbox claude instead of its bundled SDK CLI
 (setenv "CLAUDE_CODE_EXECUTABLE" (expand-file-name "~/.toolbox/bin/claude"))
 
@@ -384,3 +386,145 @@
 
 (advice-add 'image-mouse-increase-size :after #'my/org-image-persist-width)
 (advice-add 'image-mouse-decrease-size :after #'my/org-image-persist-width)
+
+(use-package! gptel
+  :config
+  (require 'gptel-integrations)
+  (setq gptel-default-mode 'org-mode)
+  (gptel-make-bedrock "AWS"
+    ;; optionally enable streaming
+    :stream t
+    :aws-profile "posadchy-bedrock"
+    :region "us-west-2"
+    ;; subset of gptel--bedrock-models
+    :models '(claude-opus-5-5)
+    ;; Model region for cross-region inference profiles. Required for models such
+    ;; as Claude without on-demand throughput support. One of 'apac, 'eu or 'us.
+    ;; https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-use.html
+    :model-region 'us))
+
+(use-package! mcp
+  :after gptel
+  :config
+  (require 'mcp-hub)
+  (setq mcp-hub-servers
+        '(("builder-mcp" . (:command "builder-mcp"))))
+  ;; Start MCP servers asynchronously and register/enable their tools in
+  ;; gptel by default (adds them to the global `gptel-tools').
+  (setq gptel-use-tools t)
+  ;; Always insert tool calls + results into the buffer (gptel folds them).
+  (setq gptel-include-tool-results t)
+  (gptel-mcp-connect))
+
+(defvar-local my/agent-shell-auto-approve nil
+  "When non-nil in an agent-shell buffer, auto-approve its permission requests.
+Requests that would mutate the local filesystem are still rejected unless
+they only touch `my/agent-shell-writable-dirs' (see
+`my/agent-shell--read-only-responder').")
+
+(defvar my/agent-shell-writable-dirs '("~/.cache/slack-watch/")
+  "Directories auto-approved shells may still write to (watcher state).")
+
+(defun my/agent-shell--writable-path-p (path)
+  "Non-nil if PATH is inside one of `my/agent-shell-writable-dirs'."
+  (and (stringp path)
+       (let ((file (expand-file-name path)))
+         (seq-some (lambda (dir) (file-in-directory-p file (expand-file-name dir)))
+                   my/agent-shell-writable-dirs))))
+
+(defun my/agent-shell--tool-call-paths (tool-call)
+  "Return the file paths TOOL-CALL targets, from its raw input and locations."
+  (let ((raw (map-elt tool-call :raw-input)))
+    (delq nil
+          (append (mapcar (lambda (key) (map-elt raw key))
+                          '(file_path notebook_path path))
+                  (mapcar (lambda (loc) (map-elt loc 'path))
+                          (map-elt tool-call :locations))))))
+
+(defun my/agent-shell--respond (permission kind)
+  "Answer PERMISSION with its first option of KIND.  Return non-nil if sent."
+  (when-let* ((choice (seq-find (lambda (option) (equal (map-elt option :kind) kind))
+                                (map-elt permission :options))))
+    (funcall (map-elt permission :respond) (map-elt choice :option-id))
+    t))
+
+(defun my/agent-shell--read-only-responder (permission)
+  "Approve PERMISSION unless it would mutate the local filesystem.
+Shell commands are always rejected (their effects can't be checked).
+File edits, deletes and moves are rejected unless every target path is
+in `my/agent-shell-writable-dirs'.  Everything else (reads, searches,
+MCP tools) is approved."
+  (let* ((tool-call (map-elt permission :tool-call))
+         (kind (map-elt tool-call :kind))
+         (paths (my/agent-shell--tool-call-paths tool-call))
+         (reject (or (equal kind "execute")
+                     (and (member kind '("edit" "delete" "move"))
+                          (not (and paths
+                                    (seq-every-p #'my/agent-shell--writable-path-p paths)))))))
+    (when reject
+      (message "Rejected %s: %s" kind (map-elt tool-call :title)))
+    (my/agent-shell--respond permission (if reject "reject_once" "allow_once"))))
+
+(defun my/agent-shell--maybe-auto-approve (orig &rest args)
+  "Guard shells with `my/agent-shell-auto-approve' set.
+Answers their permission prompts with `my/agent-shell--read-only-responder',
+and refuses client-side file writes outside `my/agent-shell-writable-dirs'."
+  (let* ((state (plist-get args :state))
+         (request (plist-get args :acp-request))
+         (buffer (map-elt state :buffer))
+         (guarded (and (buffer-live-p buffer)
+                       (buffer-local-value 'my/agent-shell-auto-approve buffer))))
+    (if (and guarded
+             (equal (map-elt request 'method) "fs/write_text_file")
+             (not (my/agent-shell--writable-path-p
+                   (agent-shell--resolve-path (map-nested-elt request '(params path))))))
+        (acp-send-response
+         :client (map-elt state :client)
+         :response (acp-make-fs-write-text-file-response
+                    :request-id (map-elt request 'id)
+                    :error (acp-make-error :code -32603
+                                           :message "Local file writes are disabled in this shell")))
+      (let ((agent-shell-permission-responder-function
+             (if guarded
+                 #'my/agent-shell--read-only-responder
+               agent-shell-permission-responder-function)))
+        (apply orig args)))))
+
+(advice-add 'agent-shell--on-request :around #'my/agent-shell--maybe-auto-approve)
+
+(defun my/agent-shell-read-only-claude-config ()
+  "Claude agent config whose sessions can't run shell commands.
+Bash and NotebookEdit are removed from the session, and the session runs
+in \"default\" mode so every remaining edit asks for permission (which
+`my/agent-shell--read-only-responder' then decides) instead of being
+auto-allowed by the \"auto\" defaultMode in ~/.claude/settings.json."
+  (let ((config (copy-tree (agent-shell-anthropic-make-claude-code-config))))
+    (setf (alist-get 'disallowedTools
+                     (alist-get 'options
+                                (alist-get 'claudeCode (alist-get :session-meta config))))
+          ["Bash" "NotebookEdit"])
+    (setf (alist-get :default-session-mode-id config) (lambda () "default"))
+    config))
+
+(load! "amazon-ai-code-reviews")
+
+(defun my/agent-shell-unstick (&optional force)
+  "Clear a stuck busy flag in the current agent-shell buffer.
+Use when the shell queues every prompt although nothing is running.
+Refuses while an ACP request is still in flight unless FORCE (prefix
+arg) is given.  Offers to send any queued prompts afterwards."
+  (interactive "P")
+  (unless (derived-mode-p 'agent-shell-mode)
+    (user-error "Run this from an agent-shell buffer"))
+  (let ((state (agent-shell--state)))
+    (when (and (agent-shell--active-requests-p state) (not force))
+      (user-error "A request is still in flight; interrupt it or use C-u to force"))
+    (agent-shell-heartbeat-stop :heartbeat (map-elt state :heartbeat))
+    (setq shell-maker--busy nil)
+    (let ((pending (length (map-elt state :pending-prompts))))
+      (if (and (> pending 0)
+               (y-or-n-p (format "Unstuck. Send %d queued prompt(s)? " pending)))
+          (agent-shell--prompt-queue-process-next)
+        (message "Unstuck%s" (if (> pending 0)
+                                 (format "; %d prompt(s) still queued" pending)
+                               ""))))))
